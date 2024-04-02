@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expert Opinion</title>
+    <style>
+        .container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            padding: 10px;
+        }
+        .container div, .container button {
+            margin-bottom: 10px;
+        }
+        section {
+            margin-top: 20px;
+            border-top: 2px solid #000;
+            padding-top: 20px;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        .container div {
+            display: flex;
+            align-items: center;
+        }
+        .container input {
+            text-align: right;
+            margin-right: 10px; /* Ensures spacing between the input and its label */
+            flex: 0 100px; /* Adjust input size and flex behavior */
+        }
+        .container label {
+            flex-grow: 1;
+            text-align: left; /* Ensure label text is left-aligned */
+        }
+    </style>
+</head>
+<body>
+    <h1>Patient Condition Input</h1>
+    <form id="conditionForm">
+        <div class="container">
+            <div>
+                <input type="text" id="ef" name="ef" readonly>
+                <label for="ef">Ejection Fraction (EF, 15-75%):</label>
+            </div>
+            <div>
+                <input type="text" id="potassium" name="potassium" readonly>
+                <label for="potassium">Potassium (2.8-5.8):</label>
+            </div>
+            <div>
+                <input type="text" id="creatinine" name="creatinine" readonly>
+                <label for="creatinine">Creatinine (0.4-6):</label>
+            </div>
+            <div>
+                <input type="text" id="proteinuria" name="proteinuria" readonly>
+                <label for="proteinuria">Proteinuria (Normal/High):</label>
+            </div>
+            <div>
+                <input type="text" id="sbp" name="sbp" readonly>
+                <label for="sbp">Systolic Blood Pressure (SBP, 60-240):</label>
+            </div>
+            <div>
+                <input type="text" id="heartRate" name="heartRate" readonly>
+                <label for="heartRate">Heart Rate (55-140):</label>
+            </div>
+            <div>
+                <input type="text" id="edema" name="edema" readonly>
+                <label for="edema">Peripheral Edema (0, TR, 1, 2, 3, 4+):</label>
+            </div>
+        </div>
+        <section id="therapySelection">
+            <h2>Select First Therapy</h2>
+            <select name="therapy" id="therapy"></select>
+        </section>
+        <section id="physicianDetails">
+            <h2>Physician Details</h2>
+            <select name="specialty" id="specialty">
+                <option value="generalMedicine">General Medicine</option>
+                <option value="nephrology">Nephrology</option>
+                <option value="cardiology">Cardiology</option>
+                <option value="undecided">Undecided</option>
+            </select>
+            <select name="experience" id="experience">
+                <option value="student">Student</option>
+                <option value="resident1">Resident 1</option>
+                <option value="resident2-3">Resident 2-3</option>
+                <option value="fellow">Fellow</option>
+                <option value="first5Years">First 5 Years</option>
+                <option value="6-10Years">6-10 Years</option>
+                <option value="over10Years">Over 10 Years</option>
+            </select>
+            <div>
+                <label for="comments">Comments:</label>
+                <textarea id="comments" name="comments"></textarea>
+            </div>
+            <button type="submit">Submit</button>
+        </section>
+    </form>
+
+    <button type="button" onclick="generatePatientConditions()">Generate Patient Conditions</button>
+
+<script>
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function generateRandomNumber(mean, stdDev) {
+    let u1 = 0, u2 = 0;
+    while(u1 === 0) u1 = Math.random();
+    while(u2 === 0) u2 = Math.random();
+    let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+    return z0 * stdDev + mean; // Generates a number based on the normal distribution
+}
+
+function ensureRange(value, min, max) {
+    return Math.min(Math.max(value, min), max);
+}
+
+function generateValueForCondition(mean, stdDev, min, max) {
+    let value;
+    do {
+        value = generateRandomNumber(mean, stdDev);
+        value = ensureRange(value, min, max); // Ensure the value is within the min and max
+    } while (value < min || value > max); // This check is now redundant but left for clarity
+    return value;
+}
+
+function determineProteinuria() {
+    let proteinuriaType = Math.random() < 0.5 ? 'Normal' : 'High';
+    let randomValue;
+
+    if (proteinuriaType === 'Normal') {
+        randomValue = Math.floor(Math.random() * 31); // 0-30
+    } else {
+        if (Math.random() < 0.5) {
+            randomValue = Math.floor(31 + Math.random() * (300 - 31)); // 31-300
+            proteinuriaType = 'Microalbuminuria';
+        } else {
+            randomValue = Math.floor(301 + Math.random() * (4000 - 301)); // 301-4000
+            proteinuriaType = 'Proteinuria';
+        }
+    }
+
+    return `${proteinuriaType}: ${randomValue} mg/dL`;
+}
+
+function generatePatientConditions() {
+    document.getElementById('ef').value = generateValueForCondition(55, 15, 15, 75).toFixed(2);
+    document.getElementById('potassium').value = generateValueForCondition(4, 0.75, 2.8, 5.8).toFixed(2);
+    document.getElementById('creatinine').value = generateValueForCondition(1, 1.4, 0.4, 6).toFixed(2);
+    document.getElementById('proteinuria').value = determineProteinuria();
+    document.getElementById('sbp').value = generateValueForCondition(120, 45, 60, 240).toFixed(2);
+    document.getElementById('heartRate').value = generateValueForCondition(80, 21.25, 55, 140).toFixed(2);
+    let edemaValues = ["0", "TR", "1", "2", "3", "4+"];
+    document.getElementById('edema').value = edemaValues[Math.floor(Math.random() * edemaValues.length)];
+}
+
+function populateTherapyOptions() {
+    const therapies = [
+        {value: "nothingObserve", text: "Nothing, Observe"},
+        {value: "addPressor", text: "Add Pressor"},
+        {value: "arb", text: "ARB"},
+        {value: "aldoBlocker", text: "Aldo Blocker"},
+        {value: "loop", text: "Loop"},
+        {value: "sglt2", text: "SGLT2"},
+        {value: "ntg", text: "NTG"},
+        {value: "nifedipine", text: "Nifedipine"},
+        {value: "gdmtBetaBlocker", text: "GDMT Beta Blocker"}
+    ];
+
+    shuffle(therapies); // Randomize the order
+
+    const therapySelect = document.getElementById('therapy');
+    therapySelect.innerHTML = ''; // Clear existing options
+    therapies.forEach(therapy => {
+        let option = new Option(therapy.text, therapy.value);
+        therapySelect.add(option);
+    });
+}
+
+window.onload = function() {
+    generatePatientConditions();
+    populateTherapyOptions();
+};
+</script>
+</body>
+</html>
