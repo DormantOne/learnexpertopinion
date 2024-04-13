@@ -344,42 +344,12 @@
         firebase.initializeApp(firebaseConfig);
         var db = firebase.firestore();
 
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('conditionForm').addEventListener('submit', async function (e) {
-                e.preventDefault();
-
-                // Gather form data
-                var formData = {
-                    ef: parseFloat(document.getElementById('ef').value),
-                    potassium: parseFloat(document.getElementById('potassium').value),
-                    creatinine: parseFloat(document.getElementById('creatinine').value),
-                    proteinuria: parseFloat(document.getElementById('proteinuria').value),
-                    sbp: parseFloat(document.getElementById('sbp').value),
-                    heartRate: parseFloat(document.getElementById('heartRate').value),
-                    edema: parseFloat(document.getElementById('edema').value),
-                    therapy: document.getElementById('therapy').value,
-                    specialty: document.getElementById('specialty').value,
-                    experience: document.getElementById('experience').value,
-                    comments: document.getElementById('comments').value
-                };
-
-                // Fetch treatments from Firestore
-                const treatments = await fetchTreatments();
-
-                // Calculate the closest treatments based on standard deviations
-                const { closest, secondClosest } = findClosestTreatments(formData, treatments);
-
-                // Display the results
-                displayResults('yourAnswer', formData, 'Your Submitted Data');
-                displayResults('firstClosestResponse', closest, 'First Closest Treatment');
-                displayResults('secondClosestResponse', secondClosest, 'Second Closest Treatment');
-                displayTotalDataCount(treatments.length);
-            });
+       
 
             // Function to fetch the first document from a Firestore collection
             function fetchFirstDocument() {
                 const db = firebase.firestore();  // Get a Firestore instance
-                db.collection("your_collection_name").limit(1).get()
+                db.collection("submissions").limit(1).get()
                     .then(snapshot => {
                         if (!snapshot.empty) {
                             const firstDoc = snapshot.docs[0].data();  // Get data of the first document
@@ -402,7 +372,7 @@
             }
 
             function fetchTreatments() {
-                return db.collection('treatments').get().then(snapshot => {
+                return db.collection('submissions').get().then(snapshot => {
                     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 }).catch(error => {
                     console.error("Error fetching treatments: ", error);
@@ -801,13 +771,42 @@
         window.onload = function () {
             generatePatientConditions();
             populateTherapyOptions();
+
+             document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('conditionForm').addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                // Gather form data
+                var formData = {
+                    ef: parseFloat(document.getElementById('ef').value),
+                    potassium: parseFloat(document.getElementById('potassium').value),
+                    creatinine: parseFloat(document.getElementById('creatinine').value),
+                    proteinuria: parseFloat(document.getElementById('proteinuria').value),
+                    sbp: parseFloat(document.getElementById('sbp').value),
+                    heartRate: parseFloat(document.getElementById('heartRate').value),
+                    edema: parseFloat(document.getElementById('edema').value),
+                    therapy: document.getElementById('therapy').value,
+                    specialty: document.getElementById('specialty').value,
+                    experience: document.getElementById('experience').value,
+                    comments: document.getElementById('comments').value
+                };
+
+                // Fetch treatments from Firestore
+                const treatments = await fetchTreatments();
+
+                // Calculate the closest treatments based on standard deviations
+                const { closest, secondClosest } = findClosestTreatments(formData, treatments);
+
+                // Display the results
+                displayResults('yourAnswer', formData, 'Your Submitted Data');
+                displayResults('firstClosestResponse', closest, 'First Closest Treatment');
+                displayResults('secondClosestResponse', secondClosest, 'Second Closest Treatment');
+                displayTotalDataCount(treatments.length);
+            });
         };
 
 
-        window.onload = function () {
-            generatePatientConditions();
-            populateTherapyOptions();
-        };
+     
     </script>
 </body>
 </html>
