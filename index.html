@@ -330,125 +330,125 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script>
 
+// Firebase Configuration and Initialization
+    var firebaseConfig = {
+        apiKey: "AIzaSyDaSr9ioGP0-pUbD70GedfPfYlbeX9aP-o",
+        authDomain: "learnexpertopinion.firebaseapp.com",
+        projectId: "learnexpertopinion",
+        storageBucket: "learnexpertopinion.appspot.com",
+        messagingSenderId: "857816161275",
+        appId: "1:857816161275:web:05b700d244ab8ee730495e",
+        measurementId: "G-7T7JE0KDPG"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
 
-        var firebaseConfig = {
-            apiKey: "AIzaSyDaSr9ioGP0-pUbD70GedfPfYlbeX9aP-o",
-            authDomain: "learnexpertopinion.firebaseapp.com",
-            projectId: "learnexpertopinion",
-            storageBucket: "learnexpertopinion.appspot.com",
-            messagingSenderId: "857816161275",
-            appId: "1:857816161275:web:05b700d244ab8ee730495e",
-            measurementId: "G-7T7JE0KDPG"
-        };
+    document.addEventListener('DOMContentLoaded', function () {
+        generatePatientConditions();
+        populateTherapyOptions();
 
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.firestore();
+        document.getElementById('conditionForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
 
-       
+            var formData = {
+                ef: parseFloat(document.getElementById('ef').value),
+                potassium: parseFloat(document.getElementById('potassium').value),
+                creatinine: parseFloat(document.getElementById('creatinine').value),
+                proteinuria: parseFloat(document.getElementById('proteinuria').value),
+                sbp: parseFloat(document.getElementById('sbp').value),
+                heartRate: parseFloat(document.getElementById('heartRate').value),
+                edema: parseFloat(document.getElementById('edema').value),
+                therapy: document.getElementById('therapy').value,
+                specialty: document.getElementById('specialty').value,
+                experience: document.getElementById('experience').value,
+                comments: document.getElementById('comments').value,
+                submittedAt: new Date().toISOString()
+            };
 
-            // Function to fetch the first document from a Firestore collection
-            function fetchFirstDocument() {
-                const db = firebase.firestore();  // Get a Firestore instance
-                db.collection("submissions").limit(1).get()
-                    .then(snapshot => {
-                        if (!snapshot.empty) {
-                            const firstDoc = snapshot.docs[0].data();  // Get data of the first document
-                            console.log("First document data:", firstDoc);
-                            // You can also call a function to display this data in your HTML
-                            displayDocumentData(firstDoc);
-                        } else {
-                            console.log("No documents found in the collection.");
-                        }
-                    })
-                    .catch(error => {
-                        console.error("Error fetching first document: ", error);
-                    });
-            }
+            const treatments = await fetchTreatments();
+            const { closest, secondClosest } = findClosestTreatments(formData, treatments);
 
-            // Example function to display document data in HTML (adjust as needed)
-            function displayDocumentData(data) {
-                const container = document.getElementById('documentData');  // Ensure you have a container with this ID in your HTML
-                container.innerHTML = JSON.stringify(data, null, 2);  // Displaying the data as a formatted string
-            }
-
-            function fetchTreatments() {
-                return db.collection('submissions').get().then(snapshot => {
-                    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                }).catch(error => {
-                    console.error("Error fetching treatments: ", error);
-                    return [];
-                });
-            }
-
-            function findClosestTreatments(patientData, treatments) {
-                let closest = null;
-                let secondClosest = null;
-                let minDistance = Infinity;
-                let secondMinDistance = Infinity;
-
-                treatments.forEach(treatment => {
-                    let distance = calculateDistance(patientData, treatment);
-                    if (distance < minDistance) {
-                        secondClosest = closest;
-                        secondMinDistance = minDistance;
-                        closest = treatment;
-                        minDistance = distance;
-                    } else if (distance < secondMinDistance) {
-                        secondClosest = treatment;
-                        secondMinDistance = distance;
-                    }
-                });
-
-                return {
-                    closest: closest || {}, // Return empty object if no closest found
-                    secondClosest: secondClosest || {} // Return empty object if no second closest found
-                };
-            }
-
-
-            function calculateDistance(data1, data2) {
-                const stats = {
-                    ef: { mean: 60, sd: 10 },
-                    potassium: { mean: 4.2, sd: 0.4 },
-                    creatinine: { mean: 1.0, sd: 0.2 },
-                    proteinuria: { mean: 150, sd: 100 },
-                    sbp: { mean: 120, sd: 15 },
-                    heartRate: { mean: 72, sd: 10 },
-                    edema: { mean: 0, sd: 1 }
-                };
-                let sum = 0;
-                Object.keys(stats).forEach(key => {
-                    if (data1[key] !== undefined && data2[key] !== undefined) {
-                        const z1 = (Number(data1[key]) - stats[key].mean) / stats[key].sd;
-                        const z2 = (Number(data2[key]) - stats[key].mean) / stats[key].sd;
-                        sum += Math.pow(z1 - z2, 2);
-                    }
-                });
-                return Math.sqrt(sum);
-            }
-
-            function displayResults(containerId, data, title) {
-                const container = document.getElementById(containerId);
-                if (!data || !container) { // Check if data or container is null
-                    console.error("No data to display or container not found for", title);
-                    return;
-                }
-                container.innerHTML = `<strong>${title}</strong><br>` +
-                    `Treatment: ${data.therapy || 'N/A'}<br>` +
-                    `EF: ${data.ef || 'N/A'}, Potassium: ${data.potassium || 'N/A'}, Creatinine: ${data.creatinine || 'N/A'}<br>` +
-                    `Proteinuria: ${data.proteinuria || 'N/A'}, SBP: ${data.sbp || 'N/A'}, HeartRate: ${data.heartRate || 'N/A'}, Edema: ${data.edema || 'N/A'}<br>` +
-                    `Specialty: ${data.specialty || 'N/A'}, Experience: ${data.experience || 'N/A'}<br>` +
-                    `Comments: ${data.comments || 'N/A'}<br>` +
-                    `Distance: ${data.distance ? data.distance.toFixed(2) : 'N/A'}<br>`;
-            }
-
-
-            function displayTotalDataCount(count) {
-                const container = document.getElementById('totalDataCount');
-                container.innerHTML = `Total treatments in system: ${count}`;
-            }
+            displayResults('yourAnswer', formData, 'Your Submitted Data');
+            displayResults('firstClosestResponse', closest, 'First Closest Treatment');
+            displayResults('secondClosestResponse', secondClosest, 'Second Closest Treatment');
+            displayTotalDataCount(treatments.length);
         });
 
+        async function fetchTreatments() {
+            try {
+                const snapshot = await db.collection('submissions').get();
+                return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            } catch (error) {
+                console.error("Error fetching treatments: ", error);
+                return [];
+            }
+        }
+
+        function findClosestTreatments(patientData, treatments) {
+            let closest = null;
+            let secondClosest = null;
+            let minDistance = Infinity;
+            let secondMinDistance = Infinity;
+
+            treatments.forEach(treatment => {
+                let distance = calculateDistance(patientData, treatment);
+                if (distance < minDistance) {
+                    secondClosest = closest;
+                    secondMinDistance = minDistance;
+                    closest = treatment;
+                    minDistance = distance;
+                } else if (distance < secondMinDistance) {
+                    secondClosest = treatment;
+                    secondMinDistance = distance;
+                }
+            });
+
+            return { closest, secondClosest };
+        }
+
+        function calculateDistance(data1, data2) {
+            const stats = {
+                ef: { mean: 60, sd: 10 },
+                potassium: { mean: 4.2, sd: 0.4 },
+                creatinine: { mean: 1.0, sd: 0.2 },
+                proteinuria: { mean: 150, sd: 100 },
+                sbp: { mean: 120, sd: 15 },
+                heartRate: { mean: 72, sd: 10 },
+                edema: { mean: 0, sd: 1 }
+            };
+            let sum = 0;
+            Object.keys(stats).forEach(key => {
+                if (data1[key] !== undefined && data2[key] !== undefined) {
+                    const z1 = (data1[key] - stats[key].mean) / stats[key].sd;
+                    const z2 = (data2[key] - stats[key].mean) / stats[key].sd;
+                    sum += Math.pow(z1 - z2, 2);
+                }
+            });
+            return Math.sqrt(sum);
+        }
+
+        function displayResults(containerId, data, title) {
+            const container = document.getElementById(containerId);
+            if (!container) {
+                console.error("Container not found for", title);
+                return;
+            }
+            container.innerHTML = `<strong>${title}</strong><br>` +
+                                  `Treatment: ${data.therapy || 'N/A'}<br>` +
+                                  `EF: ${data.ef || 'N/A'}, Potassium: ${data.potassium || 'N/A'}, Creatinine: ${data.creatinine || 'N/A'}<br>` +
+                                  `Proteinuria: ${data.proteinuria || 'N/A'}, SBP: ${data.sbp || 'N/A'}, HeartRate: ${data.heartRate || 'N/A'}, Edema: ${data.edema || 'N/A'}<br>` +
+                                  `Specialty: ${data.specialty || 'N/A'}, Experience: ${data.experience || 'N/A'}<br>` +
+                                  `Comments: ${data.comments || 'N/A'}<br>` +
+                                  `Distance: ${data.distance ? data.distance.toFixed(2) : 'N/A'}<br>`;
+        }
+
+        function displayTotalDataCount(count) {
+            const container = document.getElementById('totalDataCount');
+            container.innerHTML = `Total treatments in system: ${count}`;
+        }
+    });
+
+         
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -768,42 +768,7 @@
 
 
 
-        window.onload = function () {
-            generatePatientConditions();
-            populateTherapyOptions();
-
-             document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('conditionForm').addEventListener('submit', async function (e) {
-                e.preventDefault();
-
-                // Gather form data
-                var formData = {
-                    ef: parseFloat(document.getElementById('ef').value),
-                    potassium: parseFloat(document.getElementById('potassium').value),
-                    creatinine: parseFloat(document.getElementById('creatinine').value),
-                    proteinuria: parseFloat(document.getElementById('proteinuria').value),
-                    sbp: parseFloat(document.getElementById('sbp').value),
-                    heartRate: parseFloat(document.getElementById('heartRate').value),
-                    edema: parseFloat(document.getElementById('edema').value),
-                    therapy: document.getElementById('therapy').value,
-                    specialty: document.getElementById('specialty').value,
-                    experience: document.getElementById('experience').value,
-                    comments: document.getElementById('comments').value
-                };
-
-                // Fetch treatments from Firestore
-                const treatments = await fetchTreatments();
-
-                // Calculate the closest treatments based on standard deviations
-                const { closest, secondClosest } = findClosestTreatments(formData, treatments);
-
-                // Display the results
-                displayResults('yourAnswer', formData, 'Your Submitted Data');
-                displayResults('firstClosestResponse', closest, 'First Closest Treatment');
-                displayResults('secondClosestResponse', secondClosest, 'Second Closest Treatment');
-                displayTotalDataCount(treatments.length);
-            });
-        };
+  
 
 
      
