@@ -579,13 +579,78 @@
                 submittedAt: new Date().toISOString()
             };
 
-            // Using Firebase 8 syntax for Firestore
-            db.collection("submissions").add(formData).then(function (docRef) {
-                console.log("Document successfully written with ID: ", docRef.id);
-            }).catch(function (error) {
-                console.error("Error writing document: ", error);
-            });
+            if (confirmSubmission(formData)) {
+                db.collection("submissions").add(formData).then(function (docRef) {
+                    console.log("Document successfully written with ID: ", docRef.id);
+                }).catch(function (error) {
+                    console.error("Error writing document: ", error);
+                });
+            }
         }
+
+        function confirmSubmission(formData) {
+            var treatmentMessage = "Selected Treatment: " + formData.therapy + "\n\n";
+            var abnormalMessage = "Please review the ABNORMAL values:\n";
+            var normalMessage = "Values WITHIN RANGE:\n";
+            var credentialsMessage = "\nPhysician Details:\n";
+            var isAbnormal = false; // Flag to check if there are any abnormal values
+
+            // Define thresholds for abnormal conditions, including edema
+            const thresholds = {
+                ef: { low: 50 }, // EF under 50 is abnormal
+                potassium: { low: 3.4, high: 5.23 },
+                creatinine: { high: 1.2 },
+                proteinuria: { high: 30 },
+                sbp: { low: 90, high: 180 },
+                heartRate: { low: 60, high: 110 },
+                edema: { high: 0.5 } // Any edema above 0.5 is abnormal
+            };
+
+            // Check each value and categorize it
+            function checkAndCategorize(value, key, label) {
+                let low = thresholds[key]?.low;
+                let high = thresholds[key]?.high;
+                if ((low && value < low) || (high && value > high)) {
+                    abnormalMessage += `${label}: ${value}\n`;
+                    isAbnormal = true;
+                } else {
+                    normalMessage += `${label}: ${value}\n`;
+                }
+            }
+
+            // Check and categorize each form data entry
+            checkAndCategorize(formData.ef, 'ef', 'Ejection Fraction (EF)');
+            checkAndCategorize(formData.potassium, 'potassium', 'Potassium');
+            checkAndCategorize(formData.creatinine, 'creatinine', 'Creatinine');
+            checkAndCategorize(formData.proteinuria, 'proteinuria', 'Proteinuria');
+            checkAndCategorize(formData.sbp, 'sbp', 'SBP');
+            checkAndCategorize(formData.heartRate, 'heartRate', 'Heart Rate');
+            checkAndCategorize(formData.edema, 'edema', 'Pedal Edema');
+
+            // Assemble physician credentials and comments
+            credentialsMessage += "Specialty: " + formData.specialty + "\n";
+            credentialsMessage += "Experience Level: " + formData.experience + "\n";
+            credentialsMessage += "Comments: " + formData.comments + "\n";
+
+            var message = treatmentMessage;
+            if (isAbnormal) {
+                message += abnormalMessage + "\n";
+            }
+            message += normalMessage;
+            message += credentialsMessage;
+
+            // Use the confirm function to show the dialog and return the result
+            return confirm(message);
+        }
+
+
+
+
+        window.onload = function () {
+            generatePatientConditions();
+            populateTherapyOptions();
+        };
+
 
         window.onload = function () {
             generatePatientConditions();
