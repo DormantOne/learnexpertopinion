@@ -230,6 +230,22 @@
         .kidney.abnormal {
             animation: rotate-colors 3s infinite;
         }
+        /* Add these styles to your existing <style> tag */
+        .faint-red {
+            background-color: rgba(255, 0, 0, 0.6); /* Faint red with some transparency */
+        }
+
+        .faint-blue {
+            background-color: rgba(0, 0, 255, 0.6); /* Faint blue with some transparency */
+        }
+
+        .boldface {
+            font-weight: bold; /* Makes the text bold */
+        }
+        .faint-yellow {
+            background-color: rgba(255, 255, 0, 0.3); /* Faint yellow with some transparency */
+        }
+
 
     </style>
 </head>
@@ -242,7 +258,7 @@
                     <div><input type="text" id="ef" name="ef" readonly><label for="ef">Ejection Fraction (EF, 15-75%):</label></div>
                     <div><input type="text" id="potassium" name="potassium" readonly><label for="potassium">Potassium (2.8-5.8):</label></div>
                     <div><input type="text" id="creatinine" name="creatinine" readonly><label for="creatinine">Creatinine (0.4-6):</label></div>
-                    <div><input type="text" id="proteinuria" name="proteinuria" readonly><label for="proteinuria">Proteinuria (Normal/High):</label></div>
+                    <div><input type="text" id="proteinuria" name="proteinuria" readonly><label for="proteinuria">Proteinuria</label></div>
                     <div><input type="text" id="sbp" name="sbp" readonly><label for="sbp">Systolic Blood Pressure (SBP, 60-240):</label></div>
                     <div><input type="text" id="heartRate" name="heartRate" readonly><label for="heartRate">Heart Rate (55-140):</label></div>
                     <div><input type="text" id="edema" name="edema" readonly><label for="edema">Peripheral Edema (0, TR 0.5, 1+, 2+, 3+, 4+):</label></div>
@@ -299,7 +315,7 @@
   
 
         var firebaseConfig = {
-            apiKey: "AIzaSyCmwf3TuuiJZ1dZSPSIc8NNIb84bn0dv9g",
+            apiKey: "AIzaSyDaSr9ioGP0-pUbD70GedfPfYlbeX9aP-o",
             authDomain: "learnexpertopinion.firebaseapp.com",
             projectId: "learnexpertopinion",
             storageBucket: "learnexpertopinion.appspot.com",
@@ -361,11 +377,17 @@
             const creatinineValue = generateValueForCondition(1, 1.4, 0.4, 6);
             const proteinuriaValue = determineProteinuria();
             const edemaValue = generateEdema();
+            const sbpValue = generateValueForCondition(120, 45, 60, 240);
 
             // Heart rate, blood pressure, and ejection fraction without decimals
+
+            // Update the SBP value and background accordingly
+            document.getElementById('sbp').value = Math.round(sbpValue);
+            updateBackground(sbpValue); // Function to update the background color based on SBP
+
            
             document.getElementById('ef').value = Math.round(efValue);
-            document.getElementById('sbp').value = Math.round(generateValueForCondition(120, 45, 60, 240));
+            //document.getElementById('sbp').value = Math.round(generateValueForCondition(120, 45, 60, 240));
             document.getElementById('heartRate').value = Math.round(heartRateValue);
 
     
@@ -385,6 +407,28 @@
             adjustLegThickness(edemaValue);
         }
 
+        function updateBackground(sbp) {
+            const gridContainer = document.querySelector('.grid');
+            const sbpInput = document.getElementById('sbp'); // Get the SBP input field
+
+            // Reset the background and boldface styles
+            gridContainer.classList.remove('faint-red', 'faint-blue');
+            sbpInput.classList.remove('boldface', 'faint-yellow');
+
+            // Original background color rules
+            if (sbp > 180) {
+                gridContainer.classList.add('faint-red');
+            } else if (sbp < 90) {
+                gridContainer.classList.add('faint-blue');
+            }
+
+            // New boldface and faint yellow background rules for SBP input
+            if (sbp < 100 || sbp > 150) {
+                sbpInput.classList.add('boldface', 'faint-yellow');
+            }
+        }
+
+
         function generateEdema() {
             // This function needs to return a single value for edema, not an array
             if (Math.random() < 0.5) {
@@ -398,6 +442,18 @@
 
         function adjustLegThickness(edema) {
             const legs = document.querySelectorAll('.leg');
+            const edemaInput = document.getElementById('edema'); // Get the edema input field
+
+            // Reset existing styles on the edema input
+            edemaInput.classList.remove('boldface', 'faint-yellow');
+
+            // Set the edema value and apply boldface if necessary
+            edemaInput.value = edema;
+            if (edema === 0 || edema > 0.5) {
+                edemaInput.classList.add('boldface', 'faint-yellow');
+            }
+
+            // Adjust leg representations based on edema value
             legs.forEach(leg => {
                 leg.classList.remove('normal', 'mild', 'moderate', 'severe'); // Ensure all potential classes are removed
 
@@ -412,27 +468,76 @@
             });
         }
 
+
         function adjustKidneyAnimation(potassium, creatinine, proteinuria) {
             const kidneys = document.querySelectorAll('.kidney');
+            const potassiumInput = document.getElementById('potassium');
+            const creatinineInput = document.getElementById('creatinine');
+            const proteinuriaInput = document.getElementById('proteinuria');
+
+            // Reset existing styles
+            potassiumInput.classList.remove('boldface', 'faint-yellow');
+            creatinineInput.classList.remove('boldface', 'faint-yellow');
+            proteinuriaInput.classList.remove('boldface', 'faint-yellow');
+
+            // Maintain kidney animation classes
             kidneys.forEach(kidney => {
                 kidney.classList.remove('abnormal');
 
+                // Apply abnormal class to kidneys if values are out of normal range
                 if (potassium < 3.4 || potassium > 5.23 || creatinine > 1.2 || proteinuria > 30) {
                     kidney.classList.add('abnormal');
                 }
             });
+
+            // Apply boldface and faint yellow background if values are abnormal
+            if (potassium < 3.4 || potassium > 5.23) {
+                potassiumInput.classList.add('boldface', 'faint-yellow');
+            }
+            if (creatinine < 0.4 || creatinine > 1.2) {
+                creatinineInput.classList.add('boldface', 'faint-yellow');
+            }
+            if (proteinuria > 30) {
+                proteinuriaInput.classList.add('boldface', 'faint-yellow');
+            }
         }
+
 
         function adjustHeartAnimation(ef, heartRate) {
             const heart = document.querySelector('.heart');
+            const efInput = document.getElementById('ef'); // Get the EF input field
+            const heartRateInput = document.getElementById('heartRate'); // Get the heart rate input field
+
+            // Reset existing styles
+            efInput.classList.remove('boldface', 'faint-yellow');
+            heartRateInput.classList.remove('boldface', 'faint-yellow');
             heart.style.animationDuration = `${60 / heartRate}s`; // Adjust pump speed based on heart rate
 
+            // Set the EF value in the input field
+            efInput.value = Math.round(ef);
+
+            // Apply boldface and background color if EF is under 50
+            if (ef < 50) {
+                efInput.classList.add('boldface', 'faint-yellow');
+            }
+
+            // Adjust heart animation based on EF
             if (ef < 50) {
                 heart.classList.add('low-ef'); // Add flashing effect if EF is under 50
             } else {
                 heart.classList.remove('low-ef');
             }
+
+            // Set the heart rate value in the input field and apply styling if needed
+            heartRateInput.value = Math.round(heartRate); // Round heart rate to ensure it's a whole number
+            if (heartRate < 60 || heartRate > 110) {
+                heartRateInput.classList.add('boldface', 'faint-yellow');
+            }
         }
+
+
+
+
 
         function populateTherapyOptions() {
             const therapies = [
