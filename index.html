@@ -4,189 +4,488 @@
     <meta charset="UTF-8">
     <title>Expert Opinion</title>
     <style>
+        .main-container {
+            display: grid;
+            grid-template-columns: 1fr 300px; /* Adjust size as needed */
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .form-container, .animation-container {
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
         .container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-gap: 10px;
             padding: 10px;
         }
-        .container div, .container button {
-            margin-bottom: 10px;
-        }
+
+            .container div, .container button, section {
+                margin-bottom: 10px;
+            }
+
         section {
             margin-top: 20px;
             border-top: 2px solid #000;
             padding-top: 20px;
         }
-        h2 {
+
+        h1, h2 {
             margin-top: 0;
         }
+
         .container div {
             display: flex;
             align-items: center;
         }
-        .container input {
+
+        .container input, .container select, .container textarea {
             text-align: right;
-            margin-right: 10px; /* Ensures spacing between the input and its label */
-            flex: 0 100px; /* Adjust input size and flex behavior */
+            margin-right: 10px;
+            flex: 0 100px;
         }
+
         .container label {
             flex-grow: 1;
-            text-align: left; /* Ensure label text is left-aligned */
+            text-align: left;
         }
+
+        /* Animation styles */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(21, 1fr);
+            grid-template-rows: repeat(10, 40px);
+            position: relative;
+            width: 300px; /* Smaller width for side panel */
+            height: 400px;
+        }
+
+        .line {
+            background-color: black;
+            position: absolute;
+        }
+
+        .head, .body, .arm, .leg, .organ {
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .head {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: black;
+            top: 40px;
+        }
+
+        .body {
+            width: 4px;
+            height: 100px;
+            top: 80px;
+        }
+
+        .arm {
+            width: 4px;
+            height: 80px;
+            top: 100px;
+        }
+
+            .arm.left {
+                transform: rotate(30deg);
+                transform-origin: top right;
+                margin-left: -2px;
+            }
+
+            .arm.right {
+                transform: rotate(-30deg);
+                transform-origin: top left;
+                margin-left: 2px;
+            }
+
+        .leg {
+            transition: width 0.3s ease, margin-left 0.3s ease;
+            width: 4px; /* Default width */
+            height: 100px; /* Ensure they have a visible height */
+            background-color: black; /* Make sure they are visible */
+            position: absolute;
+            top: 180px; /* Adjust as necessary for positioning */
+        }
+
+            .leg.normal {
+                width: 4px; /* Normal thickness */
+                margin-left: -2px; /* Half of default width to center */
+            }
+
+            .leg.mild {
+                width: 8px; /* Mild edema */
+                margin-left: -4px; /* Half of mild width to center */
+            }
+
+            .leg.moderate {
+                width: 12px; /* Moderate edema */
+                margin-left: -6px; /* Half of moderate width to center */
+            }
+
+            .leg.severe {
+                width: 16px; /* Severe edema */
+                margin-left: -8px; /* Half of severe width to center */
+            }
+
+            .leg.left {
+                transform: rotate(-15deg);
+                transform-origin: top right;
+            }
+
+            .leg.right {
+                transform: rotate(15deg);
+                transform-origin: top left;
+            }
+
+
+        .organ {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .heart {
+            background-color: red;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            top: 120px;
+            animation: pump 0.8s ease-in-out infinite;
+        }
+
+        .kidney {
+            background-color: brown;
+            width: 14px;
+            height: 20px;
+            border-radius: 50%;
+            position: absolute;
+            top: 160px;
+            left: 50%;
+        }
+
+            .kidney.left {
+                left: calc(50% - 20px); /* Adjust the pixel value as needed */
+            }
+
+            .kidney.right {
+                left: calc(50% + 5px); /* Adjust the pixel value as needed */
+            }
+
+
+
+
+
+
+        @keyframes pump {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+            }
+
+            50% {
+                transform: translateX(-50%) scale(1.2);
+            }
+        }
+
+        @keyframes flash {
+            0%, 100% {
+                background-color: red;
+            }
+
+            50% {
+                background-color: white;
+            }
+        }
+
+        .heart.low-ef {
+            animation: flash 0.5s infinite, pump-var 1s ease-in-out infinite;
+            width: 30px; /* Larger size */
+            height: 30px; /* Larger size */
+        }
+
+        @keyframes rotate-colors {
+            0% {
+                background-color: brown;
+            }
+
+            33% {
+                background-color: blue;
+            }
+
+            66% {
+                background-color: red;
+            }
+          
+            100% {
+                background-color: saddlebrown;
+            }
+        }
+
+        .kidney.abnormal {
+            animation: rotate-colors 3s infinite;
+        }
+
     </style>
 </head>
 <body>
     <h1>Patient Condition Input</h1>
-    <form id="conditionForm">
-        <div class="container">
-            <div>
-                <input type="text" id="ef" name="ef" readonly>
-                <label for="ef">Ejection Fraction (EF, 15-75%):</label>
-            </div>
-            <div>
-                <input type="text" id="potassium" name="potassium" readonly>
-                <label for="potassium">Potassium (2.8-5.8):</label>
-            </div>
-            <div>
-                <input type="text" id="creatinine" name="creatinine" readonly>
-                <label for="creatinine">Creatinine (0.4-6):</label>
-            </div>
-            <div>
-                <input type="text" id="proteinuria" name="proteinuria" readonly>
-                <label for="proteinuria">Proteinuria (Normal/High):</label>
-            </div>
-            <div>
-                <input type="text" id="sbp" name="sbp" readonly>
-                <label for="sbp">Systolic Blood Pressure (SBP, 60-240):</label>
-            </div>
-            <div>
-                <input type="text" id="heartRate" name="heartRate" readonly>
-                <label for="heartRate">Heart Rate (55-140):</label>
-            </div>
-            <div>
-                <input type="text" id="edema" name="edema" readonly>
-                <label for="edema">Peripheral Edema (0, TR, 1, 2, 3, 4+):</label>
-            </div>
+    <div class="main-container">
+        <div class="form-container">
+            <form id="conditionForm" onsubmit="submitForm(event)">
+                <div class="container">
+                    <div><input type="text" id="ef" name="ef" readonly><label for="ef">Ejection Fraction (EF, 15-75%):</label></div>
+                    <div><input type="text" id="potassium" name="potassium" readonly><label for="potassium">Potassium (2.8-5.8):</label></div>
+                    <div><input type="text" id="creatinine" name="creatinine" readonly><label for="creatinine">Creatinine (0.4-6):</label></div>
+                    <div><input type="text" id="proteinuria" name="proteinuria" readonly><label for="proteinuria">Proteinuria (Normal/High):</label></div>
+                    <div><input type="text" id="sbp" name="sbp" readonly><label for="sbp">Systolic Blood Pressure (SBP, 60-240):</label></div>
+                    <div><input type="text" id="heartRate" name="heartRate" readonly><label for="heartRate">Heart Rate (55-140):</label></div>
+                    <div><input type="text" id="edema" name="edema" readonly><label for="edema">Peripheral Edema (0, TR 0.5, 1+, 2+, 3+, 4+):</label></div>
+                </div>
+                <section id="therapySelection">
+                    <h2>Select First Therapy</h2>
+                    <select name="therapy" id="therapy"></select>
+                </section>
+                <section id="physicianDetails">
+                    <h2>Physician Details</h2>
+                    <select name="specialty" id="specialty">
+                        <option value="generalMedicine">General Medicine</option>
+                        <option value="nephrology">Nephrology</option>
+                        <option value="cardiology">Cardiology</option>
+                        <option value="undecided">Undecided</option>
+                    </select>
+                    <select name="experience" id="experience">
+                        <option value="student">Student</option>
+                        <option value="resident1">Resident 1</option>
+                        <option value="resident2-3">Resident 2-3</option>
+                        <option value="fellow">Fellow</option>
+                        <option value="first5Years">First 5 Years</option>
+                        <option value="6-10Years">6-10 Years</option>
+                        <option value="over10Years">Over 10 Years</option>
+                    </select>
+                    <div>
+                        <label for="comments">Comments:</label>
+                        <textarea id="comments" name="comments"></textarea>
+                    </div>
+                    <button type="submit">Submit</button>
+                </section>
+            </form>
         </div>
-        <section id="therapySelection">
-            <h2>Select First Therapy</h2>
-            <select name="therapy" id="therapy"></select>
-        </section>
-        <section id="physicianDetails">
-            <h2>Physician Details</h2>
-            <select name="specialty" id="specialty">
-                <option value="generalMedicine">General Medicine</option>
-                <option value="nephrology">Nephrology</option>
-                <option value="cardiology">Cardiology</option>
-                <option value="undecided">Undecided</option>
-            </select>
-            <select name="experience" id="experience">
-                <option value="student">Student</option>
-                <option value="resident1">Resident 1</option>
-                <option value="resident2-3">Resident 2-3</option>
-                <option value="fellow">Fellow</option>
-                <option value="first5Years">First 5 Years</option>
-                <option value="6-10Years">6-10 Years</option>
-                <option value="over10Years">Over 10 Years</option>
-            </select>
-            <div>
-                <label for="comments">Comments:</label>
-                <textarea id="comments" name="comments"></textarea>
+        <div class="animation-container">
+            <div class="grid">
+                <div class="line head"></div>
+                <div class="line body"></div>
+                <div class="line arm left"></div>
+                <div class="line arm right"></div>
+                <div class="line leg left"></div>
+                <div class="line leg right"></div>
+                <div class="organ heart"></div>
+                <div class="kidney left"></div>
+                <div class="kidney right"></div>
             </div>
-            <button type="submit">Submit</button>
-        </section>
-    </form>
 
+        </div>
+    </div>
     <button type="button" onclick="generatePatientConditions()">Generate Patient Conditions</button>
 
-<script>
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-}
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+  
 
-function generateRandomNumber(mean, stdDev) {
-    let u1 = 0, u2 = 0;
-    while(u1 === 0) u1 = Math.random();
-    while(u2 === 0) u2 = Math.random();
-    let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-    return z0 * stdDev + mean; // Generates a number based on the normal distribution
-}
+        var firebaseConfig = {
+            apiKey: "AIzaSyCmwf3TuuiJZ1dZSPSIc8NNIb84bn0dv9g",
+            authDomain: "learnexpertopinion.firebaseapp.com",
+            projectId: "learnexpertopinion",
+            storageBucket: "learnexpertopinion.appspot.com",
+            messagingSenderId: "857816161275",
+            appId: "1:857816161275:web:05b700d244ab8ee730495e",
+            measurementId: "G-7T7JE0KDPG"
+        };
 
-function ensureRange(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-}
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
 
-function generateValueForCondition(mean, stdDev, min, max) {
-    let value;
-    do {
-        value = generateRandomNumber(mean, stdDev);
-        value = ensureRange(value, min, max); // Ensure the value is within the min and max
-    } while (value < min || value > max); // This check is now redundant but left for clarity
-    return value;
-}
-
-function determineProteinuria() {
-    let proteinuriaType = Math.random() < 0.5 ? 'Normal' : 'High';
-    let randomValue;
-
-    if (proteinuriaType === 'Normal') {
-        randomValue = Math.floor(Math.random() * 31); // 0-30
-    } else {
-        if (Math.random() < 0.5) {
-            randomValue = Math.floor(31 + Math.random() * (300 - 31)); // 31-300
-            proteinuriaType = 'Microalbuminuria';
-        } else {
-            randomValue = Math.floor(301 + Math.random() * (4000 - 301)); // 301-4000
-            proteinuriaType = 'Proteinuria';
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
         }
-    }
 
-    return `${proteinuriaType}: ${randomValue} mg/dL`;
-}
+        function generateRandomNumber(mean, stdDev) {
+            let u1 = 0, u2 = 0;
+            while (u1 === 0) u1 = Math.random();
+            while (u2 === 0) u2 = Math.random();
+            let z0 = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+            return z0 * stdDev + mean;
+        }
 
-function generatePatientConditions() {
-    document.getElementById('ef').value = generateValueForCondition(55, 15, 15, 75).toFixed(2);
-    document.getElementById('potassium').value = generateValueForCondition(4, 0.75, 2.8, 5.8).toFixed(2);
-    document.getElementById('creatinine').value = generateValueForCondition(1, 1.4, 0.4, 6).toFixed(2);
-    document.getElementById('proteinuria').value = determineProteinuria();
-    document.getElementById('sbp').value = generateValueForCondition(120, 45, 60, 240).toFixed(2);
-    document.getElementById('heartRate').value = generateValueForCondition(80, 21.25, 55, 140).toFixed(2);
-    let edemaValues = ["0", "TR", "1", "2", "3", "4+"];
-    document.getElementById('edema').value = edemaValues[Math.floor(Math.random() * edemaValues.length)];
-}
+        function ensureRange(value, min, max) {
+            return Math.min(Math.max(value, min), max);
+        }
 
-function populateTherapyOptions() {
-    const therapies = [
-        {value: "nothingObserve", text: "Nothing, Observe"},
-        {value: "addPressor", text: "Add Pressor"},
-        {value: "arb", text: "ARB"},
-        {value: "aldoBlocker", text: "Aldo Blocker"},
-        {value: "loop", text: "Loop"},
-        {value: "sglt2", text: "SGLT2"},
-        {value: "ntg", text: "NTG"},
-        {value: "nifedipine", text: "Nifedipine"},
-        {value: "gdmtBetaBlocker", text: "GDMT Beta Blocker"},
-        {value: "fluids", text: "Fluids"} // Added fluids as an option
-    ];
+        function generateValueForCondition(mean, stdDev, min, max) {
+            let value;
+            do {
+                value = generateRandomNumber(mean, stdDev);
+                value = ensureRange(value, min, max);
+            } while (value < min || value > max);
+            return value;
+        }
 
-    shuffle(therapies); // Randomize the order
 
-    const therapySelect = document.getElementById('therapy');
-    therapySelect.innerHTML = ''; // Clear existing options
-    therapies.forEach(therapy => {
-        let option = new Option(therapy.text, therapy.value);
-        therapySelect.add(option);
-    });
-}
+        function determineProteinuria() {
+            let randomValue;
+            if (Math.random() < 0.5) {
+                randomValue = Math.floor(Math.random() * 31);
+            } else {
+                if (Math.random() < 0.5) {
+                    randomValue = Math.floor(31 + Math.random() * (300 - 31));
+                } else {
+                    randomValue = Math.floor(301 + Math.random() * (4000 - 301));
+                }
+            }
+            return randomValue;
+        }
 
-window.onload = function() {
-    generatePatientConditions();
-    populateTherapyOptions();
-};
-</script>
+        function generatePatientConditions() {
+            const efValue = generateValueForCondition(55, 15, 15, 75);
+            const heartRateValue = generateValueForCondition(80, 21.25, 55, 140);
+            const potassiumValue = generateValueForCondition(4, 0.75, 2.8, 5.8);
+            const creatinineValue = generateValueForCondition(1, 1.4, 0.4, 6);
+            const proteinuriaValue = determineProteinuria();
+            const edemaValue = generateEdema();
+
+            // Heart rate, blood pressure, and ejection fraction without decimals
+           
+            document.getElementById('ef').value = Math.round(efValue);
+            document.getElementById('sbp').value = Math.round(generateValueForCondition(120, 45, 60, 240));
+            document.getElementById('heartRate').value = Math.round(heartRateValue);
+
+    
+
+            document.getElementById('potassium').value = potassiumValue.toFixed(1);
+            document.getElementById('creatinine').value = creatinineValue.toFixed(2);
+            document.getElementById('proteinuria').value = proteinuriaValue;
+
+          
+
+          
+            document.getElementById('edema').value = edemaValue;
+            //document.getElementById('edema').value = edemaValues.join(', '); // Display generated edema value
+
+            adjustHeartAnimation(efValue, heartRateValue);
+            adjustKidneyAnimation(potassiumValue, creatinineValue, proteinuriaValue);
+            adjustLegThickness(edemaValue);
+        }
+
+        function generateEdema() {
+            // This function needs to return a single value for edema, not an array
+            if (Math.random() < 0.5) {
+                return 0.5; // Trace edema
+            } else {
+                return Math.floor(Math.random() * 5); // Random integer from 0 to 4
+            }
+        }
+
+
+
+        function adjustLegThickness(edema) {
+            const legs = document.querySelectorAll('.leg');
+            legs.forEach(leg => {
+                leg.classList.remove('normal', 'mild', 'moderate', 'severe'); // Ensure all potential classes are removed
+
+                // Apply classes based on edema value
+                if (edema <= 1) {
+                    leg.classList.add('normal');
+                } else if (edema > 1 && edema <= 3) {
+                    leg.classList.add('mild');
+                } else {
+                    leg.classList.add('severe');
+                }
+            });
+        }
+
+        function adjustKidneyAnimation(potassium, creatinine, proteinuria) {
+            const kidneys = document.querySelectorAll('.kidney');
+            kidneys.forEach(kidney => {
+                kidney.classList.remove('abnormal');
+
+                if (potassium < 3.4 || potassium > 5.23 || creatinine > 1.2 || proteinuria > 30) {
+                    kidney.classList.add('abnormal');
+                }
+            });
+        }
+
+        function adjustHeartAnimation(ef, heartRate) {
+            const heart = document.querySelector('.heart');
+            heart.style.animationDuration = `${60 / heartRate}s`; // Adjust pump speed based on heart rate
+
+            if (ef < 50) {
+                heart.classList.add('low-ef'); // Add flashing effect if EF is under 50
+            } else {
+                heart.classList.remove('low-ef');
+            }
+        }
+
+        function populateTherapyOptions() {
+            const therapies = [
+                { value: "nothingObserve", text: "Nothing, Observe" },
+                { value: "addPressor", text: "Add Pressor" },
+                { value: "arb", text: "ARB" },
+                { value: "aldoBlocker", text: "Aldo Blocker" },
+                { value: "loop", text: "Loop" },
+                { value: "sglt2", text: "SGLT2" },
+                { value: "ntg", text: "NTG" },
+                { value: "nifedipine", text: "Nifedipine" },
+                { value: "gdmtBetaBlocker", text: "GDMT Beta Blocker" },
+                { value: "fluids", text: "Fluids" }
+            ];
+            shuffle(therapies);
+            const therapySelect = document.getElementById('therapy');
+            therapySelect.innerHTML = '';
+            therapies.forEach(therapy => {
+                let option = new Option(therapy.text, therapy.value);
+                therapySelect.add(option);
+            });
+        }
+
+        function submitForm(e) {
+            e.preventDefault(); // Prevent default form submission behavior
+
+            var formData = {
+                ef: document.getElementById('ef').value,
+                potassium: document.getElementById('potassium').value,
+                creatinine: document.getElementById('creatinine').value,
+                proteinuria: document.getElementById('proteinuria').value,
+                sbp: document.getElementById('sbp').value,
+                heartRate: document.getElementById('heartRate').value,
+                edema: document.getElementById('edema').value,
+                therapy: document.getElementById('therapy').value,
+                specialty: document.getElementById('specialty').value,
+                experience: document.getElementById('experience').value,
+                comments: document.getElementById('comments').value,
+                submittedAt: new Date().toISOString()
+            };
+
+            // Using Firebase 8 syntax for Firestore
+            db.collection("submissions").add(formData).then(function (docRef) {
+                console.log("Document successfully written with ID: ", docRef.id);
+            }).catch(function (error) {
+                console.error("Error writing document: ", error);
+            });
+        }
+
+        window.onload = function () {
+            generatePatientConditions();
+            populateTherapyOptions();
+        };
+    </script>
 </body>
 </html>
