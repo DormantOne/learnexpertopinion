@@ -221,7 +221,7 @@
             66% {
                 background-color: red;
             }
-
+          
             100% {
                 background-color: saddlebrown;
             }
@@ -242,64 +242,9 @@
         .boldface {
             font-weight: bold; /* Makes the text bold */
         }
-
         .faint-yellow {
             background-color: rgba(255, 255, 0, 0.3); /* Faint yellow with some transparency */
         }
-
-      
-
-        #therapySelection {
-            display: flex; /* Enables flexbox layout */
-            align-items: center; /* Vertically centers the items in the line */
-            gap: 10px; /* Adds some space between the heading and the dropdown */
-        }
-
-            #therapySelection h2 {
-                margin-bottom: 0; /* Removes bottom margin from the heading */
-            }
-
-            #therapySelection select {
-                width: 200px; /* Ensures the dropdown is the same width as other inputs */
-                padding: 8px; /* Adds padding to make the dropdown height similar to text inputs */
-                box-sizing: border-box; /* Includes padding and border in the width calculation */
-                border: 1px solid #ccc; /* Optional: adds a border that matches other inputs */
-                border-radius: 4px; /* Optional: rounds the corners to match other inputs */
-            }
-
-
-        #physicianDetails {
-            display: flex; /* Use flexbox to layout children inline */
-            align-items: center; /* Align items vertically */
-            flex-wrap: wrap; /* Allows items to wrap as needed on smaller screens */
-            gap: 10px; /* Spacing between elements */
-        }
-
-            #physicianDetails h2, #physicianDetails select, #physicianDetails input[type="text"], #physicianDetails textarea, #physicianDetails button {
-                margin: 0 10px 10px 0; /* Spacing for readability */
-            }
-
-            #physicianDetails select, #physicianDetails input[type="text"], #physicianDetails textarea {
-                width: 200px; /* More compact width */
-                padding: 8px;
-                box-sizing: border-box;
-            }
-
-            #physicianDetails button {
-                padding: 8px 16px; /* Smaller padding for a more compact button */
-                background-color: #4CAF50;
-                color: white;
-                font-size: 14px;
-                border: none;
-                border-radius: 5px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-                cursor: pointer;
-            }
-
-                #physicianDetails button:hover {
-                    background-color: #45a049;
-                }
-
 
 
     </style>
@@ -318,32 +263,19 @@
                     <div><input type="text" id="heartRate" name="heartRate" readonly><label for="heartRate">Heart Rate (55-140):</label></div>
                     <div><input type="text" id="edema" name="edema" readonly><label for="edema">Peripheral Edema (0, TR 0.5, 1+, 2+, 3+, 4+):</label></div>
                 </div>
-
-
-
                 <section id="therapySelection">
                     <h2>Select First Therapy</h2>
-                    <select name="therapy" id="therapy" required>
-                        <option value="" disabled selected>Select One</option>
-                        <!-- Other options will be dynamically populated here -->
-                    </select>
+                    <select name="therapy" id="therapy"></select>
                 </section>
-
-
-
                 <section id="physicianDetails">
                     <h2>Physician Details</h2>
-                    <select name="specialty" id="specialty" required>
-                        <option value="" disabled selected>Select Specialty</option> <!-- Updated placeholder text -->
+                    <select name="specialty" id="specialty">
                         <option value="generalMedicine">General Medicine</option>
                         <option value="nephrology">Nephrology</option>
                         <option value="cardiology">Cardiology</option>
-                        <option value="pulmonary">Pulmonary</option>
-                        <option value="other">Other</option>
                         <option value="undecided">Undecided</option>
                     </select>
-                    <select name="experience" id="experience" required>
-                        <option value="" disabled selected>Select Experience</option> <!-- Updated placeholder text -->
+                    <select name="experience" id="experience">
                         <option value="student">Student</option>
                         <option value="resident1">Resident 1</option>
                         <option value="resident2-3">Resident 2-3</option>
@@ -352,17 +284,12 @@
                         <option value="6-10Years">6-10 Years</option>
                         <option value="over10Years">Over 10 Years</option>
                     </select>
-                    <input type="text" id="otherSpecialty" name="otherSpecialty" placeholder="Please specify" style="display: none;" />
                     <div>
-
-                        <textarea id="comments" name="comments" placeholder="Please enter any comments here..." style="width: 200px; height: 100px;"></textarea>
-
+                        <label for="comments">Comments:</label>
+                        <textarea id="comments" name="comments"></textarea>
                     </div>
                     <button type="submit">Submit</button>
                 </section>
-
-
-
             </form>
         </div>
         <div class="animation-container">
@@ -420,11 +347,6 @@
         document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('conditionForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
-
-                if (!document.getElementById('therapy').value) {
-                    alert("Please select a therapy before submitting.");
-                    return; // Prevent form submission if therapy is not selected
-                }
 
                 // Gather form data
                 var formData = {
@@ -780,12 +702,11 @@
                 { value: "ntg", text: "NTG" },
                 { value: "nifedipine", text: "Nifedipine" },
                 { value: "gdmtBetaBlocker", text: "GDMT Beta Blocker" },
-                { value: "entresto", text: "Entresto" },
                 { value: "fluids", text: "Fluids" }
             ];
             shuffle(therapies);
             const therapySelect = document.getElementById('therapy');
-            therapySelect.innerHTML = '<option value="" disabled selected>Select One</option>'; // Reset with placeholder
+            therapySelect.innerHTML = '';
             therapies.forEach(therapy => {
                 let option = new Option(therapy.text, therapy.value);
                 therapySelect.add(option);
@@ -883,7 +804,10 @@
         };
 
 
-      
+        window.onload = function () {
+            generatePatientConditions();
+            populateTherapyOptions();
+        };
     </script>
 </body>
 </html>
