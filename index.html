@@ -314,10 +314,27 @@
                 #physicianDetails button:hover {
                     background-color: #45a049;
                 }
+
+        .results-container {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75em; /* Smaller text size */
+            margin-top: 20px;
+            padding: 5px;
+            overflow: auto; /* Allows scrolling if content is too wide */
+        }
+
+            .results-container > div {
+                flex: 1;
+                padding: 5px;
+                border: 1px solid #ccc; /* Adds border around each section */
+                margin: 0 5px; /* Adds spacing between sections */
+            }
+
     </style>
 </head>
 <body>
-    <h1>Patient Condition Input</h1>
+    <h1>VITAL ENGINES - RAS Edition - You teach it; It teaches you</h1>
     <div class="main-container">
         <div class="form-container">
             <form id="conditionForm" onsubmit="submitForm(event)">
@@ -396,19 +413,12 @@
     </div>
     <!-- Place this right after your form or at the bottom of your main container -->
     <div class="results-container">
-        <h2>Your Answer</h2>
-        <div id="yourAnswer"></div>
-
-        <h2>First Closest Response</h2>
-        <div id="firstClosestResponse"></div>
-
-        <h2>Second Closest Response</h2>
-        <div id="secondClosestResponse"></div>
-
-        <h2>Total Data in System</h2>
-        <div id="totalDataCount"></div>
+        <div id="yourAnswer"><h3>Your Answer</h3></div>
+        <div id="firstClosestResponse"><h3>First Closest Response</h3></div>
+        <div id="secondClosestResponse"><h3>Second Closest Response</h3></div>
     </div>
-    
+
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script>
@@ -502,29 +512,24 @@
 
 
             function findClosestTreatments(patientData, treatments) {
-                let closest = null;
-                let secondClosest = null;
-                let minDistance = Infinity;
-                let secondMinDistance = Infinity;
+                // Calculate distances and sort them
+                let results = treatments.map(treatment => ({
+                    data: treatment,
+                    distance: calculateDistance(patientData, treatment)
+                })).sort((a, b) => a.distance - b.distance);
 
-                treatments.forEach(treatment => {
-                    let distance = calculateDistance(patientData, treatment);
-                    if (distance < minDistance) {
-                        secondClosest = closest;
-                        secondMinDistance = minDistance;
-                        closest = treatment;
-                        minDistance = distance;
-                    } else if (distance < secondMinDistance) {
-                        secondClosest = treatment;
-                        secondMinDistance = distance;
-                    }
-                });
+                // Retrieve the three closest results, including distances in the returned object
+                const closest = results[1] ? { ...results[1].data, distance: results[1].distance } : {}; // first closest (skipping self which would be [0])
+                const secondClosest = results[2] ? { ...results[2].data, distance: results[2].distance } : {}; // second closest
+                const thirdClosest = results[3] ? { ...results[3].data, distance: results[3].distance } : {}; // third closest
 
                 return {
-                    closest: closest || {}, // Return empty object if no closest found
-                    secondClosest: secondClosest || {} // Return empty object if no second closest found
+                    closest: closest,
+                    secondClosest: secondClosest,
+                    thirdClosest: thirdClosest
                 };
             }
+
 
 
             function calculateDistance(data1, data2) {
@@ -562,6 +567,7 @@
                     `Comments: ${data.comments || 'N/A'}<br>` +
                     `Distance: ${data.distance ? data.distance.toFixed(2) : 'N/A'}<br>`;
             }
+
 
 
             function displayTotalDataCount(count) {
